@@ -44,6 +44,15 @@
           />
         </div>
       </div>
+      <div class="column flex">
+       <input
+          type="text"
+          class="p-2 mr-2 flex-grow"
+          placeholder="New column name"
+          v-model="newColumnName"
+          @keyup.enter="createColumn"
+        />
+      </div>
     </div>
     <div class="task-bg" v-if="isTaskOpen" @click.self="close">
       <router-view/>
@@ -54,6 +63,11 @@
 <script>
 import { mapState } from 'vuex'
 export default {
+  data () {
+    return {
+      newColumnName: ''
+    }
+  },
   computed: {
     ...mapState(['board']),
     isTaskOpen () {
@@ -116,6 +130,12 @@ export default {
     moveColumn (e, toColumnIndex) {
       const fromColumnIndex = e.dataTransfer.getData('from-column-index')
       this.$store.commit('MOVE_COLUMN', { fromColumnIndex, toColumnIndex })
+    },
+    createColumn () {
+      this.$store.commit('CREATE_COLUMN', {
+        name: this.newColumnName
+      })
+      this.newColumnName = ''
     }
   }
 }
