@@ -11,29 +11,15 @@
       {{ column.name }}
     </div>
     <div class="list-reset">
-      <div
-        class="task"
+      <ColumnTask
         v-for="(task, $taskIndex) of column.tasks"
         :key="$taskIndex"
-        @click="goToTask(task)"
-        draggable
-        @dragstart="pickupTask($event, $taskIndex, columnIndex)"
-        @dragover.prevent
-        @dragenter.prevent
-        @drop.stop="
-          moveTaskOrColumn($event, column.tasks, columnIndex, $taskIndex)
-        "
-      >
-        <span class="w-full flex-no-shrink font-bold">
-          {{ task.name }}
-        </span>
-        <p
-          v-if="task.description"
-          class="w-full flex-no-shrink mt-1 text-small"
-        >
-          {{ task.description }}
-        </p>
-      </div>
+        :task="task"
+        :taskIndex="$taskIndex"
+        :column="column"
+        :columnIndex="columnIndex"
+        :board="board"
+      />
       <input
         type="text"
         class="block p-2 w-full bg-transparent"
@@ -45,7 +31,9 @@
 </template>
 
 <script>
+import ColumnTask from './ColumnTask'
 export default {
+  components: { ColumnTask },
   props: {
     column: {
       type: Object,
@@ -100,19 +88,6 @@ export default {
       this.$store.commit('CREATE_TASK', { tasks, name: e.target.value })
       // clear input
       e.target.value = ''
-    },
-    pickupTask (e, fromTaskIndex, fromColumnIndex) {
-      // dataTransfer interface works pretty similar to localStorage in that it can only store properties that can be /stringified/
-      // This means transferring recursive data structures or functions won’t work.
-      e.dataTransfer.effectAllowed = 'move'
-      e.dataTransfer.dropEffect = 'move'
-
-      e.dataTransfer.setData('from-task-index', fromTaskIndex)
-      e.dataTransfer.setData('from-column-index', fromColumnIndex)
-      e.dataTransfer.setData('type', 'task')
-    },
-    goToTask (task) {
-      this.$router.push({ name: 'task', params: { id: task.id } })
     }
   }
 }
