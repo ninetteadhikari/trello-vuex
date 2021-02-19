@@ -12,7 +12,7 @@
         <input
           type="text"
           class="p-2 mr-2 flex-grow"
-          placeholder="New column name"
+          placeholder="+ New list name"
           v-model="newColumnName"
           @keyup.enter="createColumn"
         />
