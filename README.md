@@ -11,7 +11,7 @@ This is a Trello clone application to create lists and tasks with drag and drop 
 - Create new list
 - Move lists
 
-<img src="./public/app_screen.png" style="height:300px">
+<img src="./public/app_screen.png" style="height:200px">
 
 ## App components
 
