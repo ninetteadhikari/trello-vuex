@@ -5,9 +5,11 @@
         class="column"
         v-for="(column, $columnIndex) of board.columns"
         :key="$columnIndex"
-        @drop="moveTask($event, column.tasks)"
+        draggable
+        @drop="moveTaskOrColumn($event, column.tasks, $columnIndex)"
         @dragover.prevent
         @dragenter.prevent
+        @dragstart.self="pickupColumn($event, $columnIndex)"
       >
         <div class="flex items-center mb-2 font-bold">
           {{ column.name }}
@@ -72,8 +74,17 @@ export default {
       // This means transferring recursive data structures or functions won’t work.
       e.dataTransfer.effectAllowed = 'move'
       e.dataTransfer.dropEffect = 'move'
+
       e.dataTransfer.setData('task-index', taskIndex)
       e.dataTransfer.setData('from-column-index', fromColumnIndex)
+      e.dataTransfer.setData('type', 'task')
+    },
+    pickupColumn (e, fromColumnIndex) {
+      e.dataTransfer.effectAllowed = 'move'
+      e.dataTransfer.dropEffect = 'move'
+
+      e.dataTransfer.setData('from-column-index', fromColumnIndex)
+      e.dataTransfer.setData('type', 'column')
     },
     moveTask (e, toTasks) {
       const fromColumnIndex = e.dataTransfer.getData('from-column-index')
@@ -85,6 +96,22 @@ export default {
         toTasks,
         taskIndex
       })
+    },
+    moveTaskOrColumn (e, toTasks, toColumnIndex, toTaskIndex) {
+      const type = e.dataTransfer.getData('type')
+      if (type === 'task') {
+        this.moveTask(
+          e,
+          toTasks,
+          toTaskIndex !== undefined ? toTaskIndex : toTasks.length
+        )
+      } else {
+        this.moveColumn(e, toColumnIndex)
+      }
+    },
+    moveColumn (e, toColumnIndex) {
+      const fromColumnIndex = e.dataTransfer.getData('from-column-index')
+      this.$store.commit('MOVE_COLUMN', { fromColumnIndex, toColumnIndex })
     }
   }
 }
