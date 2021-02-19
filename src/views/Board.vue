@@ -22,6 +22,9 @@
             @click="goToTask(task)"
             draggable
             @dragstart="pickupTask($event, $taskIndex, $columnIndex)"
+            @dragover.prevent
+            @dragenter.prevent
+            @drop.stop="moveTaskOrColumn($event, column.tasks, $columnIndex, $taskIndex)"
           >
             <span class="w-full flex-no-shrink font-bold">
               {{ task.name }}
@@ -69,13 +72,13 @@ export default {
       // clear input
       e.target.value = ''
     },
-    pickupTask (e, taskIndex, fromColumnIndex) {
+    pickupTask (e, fromTaskIndex, fromColumnIndex) {
       // dataTransfer interface works pretty similar to localStorage in that it can only store properties that can be /stringified/
       // This means transferring recursive data structures or functions won’t work.
       e.dataTransfer.effectAllowed = 'move'
       e.dataTransfer.dropEffect = 'move'
 
-      e.dataTransfer.setData('task-index', taskIndex)
+      e.dataTransfer.setData('from-task-index', fromTaskIndex)
       e.dataTransfer.setData('from-column-index', fromColumnIndex)
       e.dataTransfer.setData('type', 'task')
     },
@@ -86,15 +89,16 @@ export default {
       e.dataTransfer.setData('from-column-index', fromColumnIndex)
       e.dataTransfer.setData('type', 'column')
     },
-    moveTask (e, toTasks) {
+    moveTask (e, toTasks, toTaskIndex) {
       const fromColumnIndex = e.dataTransfer.getData('from-column-index')
       const fromTasks = this.board.columns[fromColumnIndex].tasks
-      const taskIndex = e.dataTransfer.getData('task-index')
+      const fromTaskIndex = e.dataTransfer.getData('from-task-index')
 
       this.$store.commit('MOVE_TASK', {
         fromTasks,
+        fromTaskIndex,
         toTasks,
-        taskIndex
+        toTaskIndex
       })
     },
     moveTaskOrColumn (e, toTasks, toColumnIndex, toTaskIndex) {
