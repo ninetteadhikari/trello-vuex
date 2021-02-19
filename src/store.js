@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import defaultBoard from './default-board'
-import { saveStatePlugin, uuid } from './utils'
+import { saveStatePlugin } from './utils'
+import { v4 as uuidv4 } from 'uuid'
 
 Vue.use(Vuex)
 
@@ -29,7 +30,7 @@ export default new Vuex.Store({
     CREATE_TASK (state, { tasks, name }) {
       tasks.push({
         name,
-        id: uuid(),
+        id: uuidv4(),
         description: ''
       })
     },

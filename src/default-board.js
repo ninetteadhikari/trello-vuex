@@ -1,4 +1,5 @@
-import { uuid } from './utils'
+// import { uuid } from './utils'
+import { v4 as uuidv4 } from 'uuid'
 
 export default {
   name: 'workshop',
@@ -9,19 +10,19 @@ export default {
         {
           description: '',
           name: 'first task',
-          id: uuid(),
+          id: uuidv4(),
           userAssigned: null
         },
         {
           description: '',
           name: 'second task',
-          id: uuid(),
+          id: uuidv4(),
           userAssigned: null
         },
         {
           description: '',
           name: 'and third',
-          id: uuid(),
+          id: uuidv4(),
           userAssigned: null
         }
       ]
@@ -32,7 +33,7 @@ export default {
         {
           description: '',
           name: 'first task',
-          id: uuid(),
+          id: uuidv4(),
           userAssigned: null
         }
       ]
@@ -43,7 +44,7 @@ export default {
         {
           description: '',
           name: 'first task',
-          id: uuid(),
+          id: uuidv4(),
           userAssigned: null
         }
       ]
