@@ -1,25 +1,30 @@
 <template>
-  <div
-    class="task"
-    @click="goToTask(task)"
-    draggable
-    @dragstart="pickupTask($event, taskIndex, columnIndex)"
-    @dragover.prevent
-    @dragenter.prevent
-    @drop.stop="moveTaskOrColumn($event, column.tasks, columnIndex, taskIndex)"
-  >
-    <span class="w-full flex-no-shrink font-bold">
-      {{ task.name }}
-    </span>
-    <p v-if="task.description" class="w-full flex-no-shrink mt-1 text-small">
-      {{ task.description }}
-    </p>
-  </div>
+  <AppDrop @drop="moveTaskOrColumn">
+    <AppDrag
+      class="task"
+      :transferData="{
+        type: 'task',
+        fromColumnIndex: columnIndex,
+        fromTaskIndex: taskIndex,
+      }"
+      @click="goToTask(task)"
+    >
+      <span class="w-full flex-no-shrink font-bold">
+        {{ task.name }}
+      </span>
+      <p v-if="task.description" class="w-full flex-no-shrink mt-1 text-small">
+        {{ task.description }}
+      </p>
+    </AppDrag>
+  </AppDrop>
 </template>
 
 <script>
+import AppDrag from './AppDrag'
+import AppDrop from './AppDrop'
 import movingTasksAndColumnsMixin from '@/mixins/movingTasksAndColumnsMixin'
 export default {
+  components: { AppDrag, AppDrop },
   mixins: [ movingTasksAndColumnsMixin ],
   props: {
     task: {
@@ -34,16 +39,6 @@ export default {
   methods: {
     goToTask (task) {
       this.$router.push({ name: 'task', params: { id: task.id } })
-    },
-    pickupTask (e, fromTaskIndex, fromColumnIndex) {
-      // dataTransfer interface works pretty similar to localStorage in that it can only store properties that can be /stringified/
-      // This means transferring recursive data structures or functions won’t work.
-      e.dataTransfer.effectAllowed = 'move'
-      e.dataTransfer.dropEffect = 'move'
-
-      e.dataTransfer.setData('from-task-index', fromTaskIndex)
-      e.dataTransfer.setData('from-column-index', fromColumnIndex)
-      e.dataTransfer.setData('type', 'task')
     }
   }
 }
