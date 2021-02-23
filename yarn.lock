@@ -1322,6 +1322,11 @@
   dependencies:
     "sprintf-js" "~1.0.2"
 
+"argsarray@0.0.1":
+  "integrity" "sha1-bnIHtOzbObCviDA/pa4ivajfYcs="
+  "resolved" "https://registry.npmjs.org/argsarray/-/argsarray-0.0.1.tgz"
+  "version" "0.0.1"
+
 "arr-diff@^4.0.0":
   "integrity" "sha1-1kYQdP6/7HHn4VI1dhoyml3HxSA="
   "resolved" "https://registry.npmjs.org/arr-diff/-/arr-diff-4.0.0.tgz"
@@ -4255,6 +4260,11 @@
   "resolved" "https://registry.npmjs.org/ignore/-/ignore-5.0.6.tgz"
   "version" "5.0.6"
 
+"immediate@3.3.0":
+  "integrity" "sha512-HR7EVodfFUdQCTIeySw+WDRFJlPcLOJbXfwwZ7Oom6tjsvZ3bOkCDJHehQC3nxJrv7+f9XecwazynjU8e4Vw3Q=="
+  "resolved" "https://registry.npmjs.org/immediate/-/immediate-3.3.0.tgz"
+  "version" "3.3.0"
+
 "import-cwd@^2.0.0":
   "integrity" "sha1-qmzzbnInYShcs3HsZRn1PiQ1sKk="
   "resolved" "https://registry.npmjs.org/import-cwd/-/import-cwd-2.1.0.tgz"
@@ -4325,6 +4335,11 @@
   "integrity" "sha1-sX0I0ya0Qj5Wjv9xn5GwscvfafE="
   "resolved" "https://registry.npmjs.org/inherits/-/inherits-2.0.1.tgz"
   "version" "2.0.1"
+
+"inherits@2.0.4":
+  "integrity" "sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ=="
+  "resolved" "https://registry.npmjs.org/inherits/-/inherits-2.0.4.tgz"
+  "version" "2.0.4"
 
 "inquirer@^3.0.6":
   "integrity" "sha512-h+xtnyk4EwKvFWHrUYsWErEVR+igKtLdchu+o0Z1RL7VU/jVMFbYir2bp6bAj8efFNxWqHX0dIss6fJQ+/+qeQ=="
@@ -6637,6 +6652,18 @@
     "source-map" "^0.6.1"
     "supports-color" "^6.1.0"
 
+"pouchdb-browser@^7.2.2":
+  "integrity" "sha512-90pkngk9/F95knUwOhGQ0xuNzG51uIecF5kD5AfNdhqqrV9wbngz+I3QA7u/9eVyZRVyOrTrT3oaKcNqAB7Brg=="
+  "resolved" "https://registry.npmjs.org/pouchdb-browser/-/pouchdb-browser-7.2.2.tgz"
+  "version" "7.2.2"
+  dependencies:
+    "argsarray" "0.0.1"
+    "immediate" "3.3.0"
+    "inherits" "2.0.4"
+    "spark-md5" "3.0.1"
+    "uuid" "8.1.0"
+    "vuvuzela" "1.0.3"
+
 "prelude-ls@~1.1.2":
   "integrity" "sha1-IZMqVJ9eUv/ZqCf1cOBL5iqX2lQ="
   "resolved" "https://registry.npmjs.org/prelude-ls/-/prelude-ls-1.1.2.tgz"
@@ -7536,6 +7563,11 @@
   dependencies:
     "amdefine" ">=0.0.4"
 
+"spark-md5@3.0.1":
+  "integrity" "sha512-0tF3AGSD1ppQeuffsLDIOWlKUd3lS92tFxcsrh5Pe3ZphhnoK+oXIBTzOAThZCiuINZLvpiLH/1VS1/ANEJVig=="
+  "resolved" "https://registry.npmjs.org/spark-md5/-/spark-md5-3.0.1.tgz"
+  "version" "3.0.1"
+
 "spdx-correct@^3.0.0":
   "integrity" "sha512-lr2EZCctC2BNR7j7WzJ2FpDznxky1sjfxvvYEyzxNyb6lZXHODmEoJeFu4JupYlkfha1KZpJyoqiJ7pgA1qq8Q=="
   "resolved" "https://registry.npmjs.org/spdx-correct/-/spdx-correct-3.1.0.tgz"
@@ -8290,6 +8322,11 @@
   "resolved" "https://registry.npmjs.org/uuid/-/uuid-3.3.2.tgz"
   "version" "3.3.2"
 
+"uuid@8.1.0":
+  "integrity" "sha512-CI18flHDznR0lq54xBycOVmphdCYnQLKn8abKn7PXUiKUGdEd+/l9LWNJmugXel4hXq7S+RMNl34ecyC9TntWg=="
+  "resolved" "https://registry.npmjs.org/uuid/-/uuid-8.1.0.tgz"
+  "version" "8.1.0"
+
 "validate-npm-package-license@^3.0.1":
   "integrity" "sha512-DpKm2Ui/xN7/HQKCtpZxoRWBhZ9Z0kqtygG8XCgNQ8ZlDnxuQmWhj566j8fN4Cu3/JmbhsDo7fcAJq4s9h27Ew=="
   "resolved" "https://registry.npmjs.org/validate-npm-package-license/-/validate-npm-package-license-3.0.4.tgz"
@@ -8404,6 +8441,11 @@
   "integrity" "sha512-mdHeHT/7u4BncpUZMlxNaIdcN/HIt1GsGG5LKByArvYG/v6DvHcOxvDCts+7SRdCoIRGllK8IMZvQtQXLppDYg=="
   "resolved" "https://registry.npmjs.org/vuex/-/vuex-3.1.0.tgz"
   "version" "3.1.0"
+
+"vuvuzela@1.0.3":
+  "integrity" "sha1-O+FF5YJxxzylUnndhR8SpoIRSws="
+  "resolved" "https://registry.npmjs.org/vuvuzela/-/vuvuzela-1.0.3.tgz"
+  "version" "1.0.3"
 
 "watchpack@^1.5.0":
   "integrity" "sha512-i6dHe3EyLjMmDlU1/bGQpEw25XSjkJULPuAVKCbNRefQVq48yXKUpwg538F7AZTf9kyr57zj++pQFltUa5H7yA=="
