@@ -5,7 +5,7 @@
       :transferData="{ type: 'column', fromColumnIndex: columnIndex }"
     >
       <div class="flex items-center mb-2 font-bold">
-        {{ column.name }}
+        {{ column.doc.name }}
       </div>
       <div class="list-reset">
         <ColumnTask

@@ -1,17 +1,22 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import defaultBoard from './default-board'
+import PouchDB from 'pouchdb-browser'
+// import defaultBoard from './default-board'
 import { saveStatePlugin } from './utils'
 import { v4 as uuidv4 } from 'uuid'
 
 Vue.use(Vuex)
 
-const board = JSON.parse(localStorage.getItem('board')) || defaultBoard
+// const board = JSON.parse(localStorage.getItem('board')) || defaultBoard
+
+let board = new PouchDB('board')
 
 export default new Vuex.Store({
   plugins: [saveStatePlugin],
   state: {
-    board
+    board: {
+      columns: []
+    }
   },
   getters: {
     getTask (state) {
@@ -24,6 +29,27 @@ export default new Vuex.Store({
           }
         }
       }
+    }
+  },
+  actions: {
+    fetchColumns ({ commit }) {
+      board.allDocs({ include_docs: true }).then(doc => {
+        commit('SET_COLUMN', doc.rows)
+      }).catch(error => {
+        console.log(error)
+      })
+    },
+    addColumn ({ commit }, name) {
+      const newColumn = {
+        _id: new Date().toISOString(),
+        name
+      }
+
+      board.put(newColumn).then(result => {
+        commit('CREATE_COLUMN', name)
+      }).catch(error => {
+        console.log(error)
+      })
     }
   },
   mutations: {
@@ -46,11 +72,16 @@ export default new Vuex.Store({
       const columnToMove = columnList.splice(fromColumnIndex, 1)[0]
       columnList.splice(toColumnIndex, 0, columnToMove)
     },
-    CREATE_COLUMN (state, { name }) {
+    CREATE_COLUMN (state, name) {
       state.board.columns.push({
-        name,
-        tasks: []
+        doc: {
+          name,
+          tasks: []
+        }
       })
+    },
+    SET_COLUMN (state, columns) {
+      state.board.columns = columns
     }
   }
 })
