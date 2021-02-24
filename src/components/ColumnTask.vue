@@ -12,7 +12,7 @@
       <span class="w-full flex-no-shrink font-bold">
         {{ task.doc.name }}
       </span>
-      <p v-if="task.description" class="w-full flex-no-shrink mt-1 text-small">
+      <p v-if="task.doc.description" class="w-full flex-no-shrink mt-1 text-small">
         {{ task.doc.description }}
       </p>
     </AppDrag>

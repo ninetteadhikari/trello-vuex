@@ -16,23 +16,9 @@ export default new Vuex.Store({
     columns: [],
     tasks: []
   },
-  getters: {
-    getTask (state) {
-      return (id) => {
-        for (const column of state.columns) {
-          for (const task of column.tasks) {
-            if (task.id === id) {
-              return task
-            }
-          }
-        }
-      }
-    }
-  },
   actions: {
     fetchAllData ({ commit }) {
       board.allDocs({ include_docs: true }).then(doc => {
-        console.log('**fetch data doc.row', doc.rows)
         commit('SET_BOARD', doc.rows)
       }).catch(error => {
         console.log(error)
@@ -60,7 +46,16 @@ export default new Vuex.Store({
       }
       board.put(newTask).then(result => {
         commit('CREATE_TASK', { result, name, columnId })
-        console.log('success task added to pouch')
+      }).catch(error => {
+        console.log(error)
+      })
+    },
+    editTask ({ commit }, { taskId, key, value }) {
+      board.get(taskId).then(doc => {
+        doc[key] = value
+        return board.put(doc)
+      }).then(response => {
+        commit('UPDATE_TASK', { taskId, key, value })
       }).catch(error => {
         console.log(error)
       })
@@ -78,8 +73,11 @@ export default new Vuex.Store({
         }
       })
     },
-    UPDATE_TASK (state, { task, key, value }) {
-      Vue.set(task, key, value)
+    UPDATE_TASK (state, { taskId, key, value }) {
+      const taskIndex = state.tasks.findIndex(task => {
+        return task.doc._id === taskId
+      })
+      state.tasks[taskIndex].doc[key] = value
     },
     MOVE_TASK (state, { fromTasks, toTasks, fromTaskIndex, toTaskIndex }) {
       const taskToMove = fromTasks.splice(fromTaskIndex, 1)[0]
