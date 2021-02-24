@@ -9,19 +9,19 @@
       </div>
       <div class="list-reset">
         <ColumnTask
-          v-for="(task, $taskIndex) of column.tasks"
+          v-for="(task, $taskIndex) of filteredTaskByColumnId()"
           :key="$taskIndex"
           :task="task"
           :taskIndex="$taskIndex"
           :column="column"
           :columnIndex="columnIndex"
-          :board="board"
+          :columns="columns"
         />
         <input
           type="text"
           class="block p-2 w-full bg-transparent"
           placeholder="+ Enter new task"
-          @keyup.enter="createTask($event, column.tasks)"
+          @keyup.enter="createTask($event, column.doc._id)"
         />
       </div>
     </AppDrag>
@@ -33,6 +33,7 @@ import ColumnTask from './ColumnTask'
 import AppDrag from './AppDrag'
 import AppDrop from './AppDrop'
 import movingTasksAndColumnsMixin from '@/mixins/movingTasksAndColumnsMixin'
+import { mapActions } from 'vuex'
 export default {
   components: { ColumnTask, AppDrag, AppDrop },
   mixins: [movingTasksAndColumnsMixin],
@@ -45,16 +46,26 @@ export default {
       type: Number,
       required: true
     },
-    board: {
-      type: Object,
+    columns: {
+      type: Array,
+      required: true
+    },
+    tasks: {
+      type: Array,
       required: true
     }
   },
   methods: {
-    createTask (e, tasks) {
-      this.$store.commit('CREATE_TASK', { tasks, name: e.target.value })
+    ...mapActions(['addTask']),
+    createTask (e, columnId) {
+      this.addTask({ name: e.target.value, columnId })
       // clear input
       e.target.value = ''
+    },
+    filteredTaskByColumnId () {
+      return this.tasks.filter(task => {
+        return task.doc.columnId === this.column.doc._id
+      })
     }
   }
 }

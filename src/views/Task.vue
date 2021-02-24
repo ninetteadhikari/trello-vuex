@@ -3,14 +3,14 @@
     <div class="flex flex-col flex-grow items-start justify-between px-4">
       <input
         class="p-2 w-full mr-2 block text-xl font-bold"
-        :value="task.name"
+        :value="task.doc.name"
         @key.enter="updateTaskProperty($event, 'name')"
         @change="updateTaskProperty($event, 'name')"
       />
       <textarea
         placeholder="Enter task description"
         class="relative w-full bg-transparent px-2 border mt-2 h-64 border-none leading-normal"
-        :value="task.description"
+        :value="task.doc.description"
         @change="updateTaskProperty($event, 'description')"
       />
     </div>

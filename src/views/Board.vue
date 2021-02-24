@@ -2,11 +2,12 @@
   <div class="board">
     <div class="flex flex-row items-start">
       <BoardColumn
-        v-for="(column, $columnIndex) of board.columns"
+        v-for="(column, $columnIndex) of columns"
         :key="$columnIndex"
         :column="column"
         :columnIndex="$columnIndex"
-        :board="board"
+        :columns="columns"
+        :tasks="tasks"
       />
       <div class="column flex">
         <input
@@ -36,13 +37,13 @@ export default {
     }
   },
   computed: {
-    ...mapState(['board']),
+    ...mapState(['columns', 'tasks']),
     isTaskOpen () {
       return this.$route.name === 'task'
     }
   },
   methods: {
-    ...mapActions(['addColumn', 'fetchColumns']),
+    ...mapActions(['addColumn', 'fetchAllData']),
     close () {
       this.$router.push({ name: 'board' })
     },
@@ -52,7 +53,7 @@ export default {
     }
   },
   created () {
-    this.fetchColumns()
+    this.fetchAllData()
   }
 }
 </script>

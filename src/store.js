@@ -3,7 +3,6 @@ import Vuex from 'vuex'
 import PouchDB from 'pouchdb-browser'
 // import defaultBoard from './default-board'
 import { saveStatePlugin } from './utils'
-import { v4 as uuidv4 } from 'uuid'
 
 Vue.use(Vuex)
 
@@ -14,14 +13,13 @@ let board = new PouchDB('board')
 export default new Vuex.Store({
   plugins: [saveStatePlugin],
   state: {
-    board: {
-      columns: []
-    }
+    columns: [],
+    tasks: []
   },
   getters: {
     getTask (state) {
       return (id) => {
-        for (const column of state.board.columns) {
+        for (const column of state.columns) {
           for (const task of column.tasks) {
             if (task.id === id) {
               return task
@@ -32,9 +30,10 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    fetchColumns ({ commit }) {
+    fetchAllData ({ commit }) {
       board.allDocs({ include_docs: true }).then(doc => {
-        commit('SET_COLUMN', doc.rows)
+        console.log('**fetch data doc.row', doc.rows)
+        commit('SET_BOARD', doc.rows)
       }).catch(error => {
         console.log(error)
       })
@@ -42,22 +41,41 @@ export default new Vuex.Store({
     addColumn ({ commit }, name) {
       const newColumn = {
         _id: new Date().toISOString(),
-        name
+        name,
+        type: 'column'
       }
-
       board.put(newColumn).then(result => {
-        commit('CREATE_COLUMN', name)
+        commit('CREATE_COLUMN', { result, name })
+      }).catch(error => {
+        console.log(error)
+      })
+    },
+    addTask ({ commit }, { name, columnId }) {
+      const newTask = {
+        _id: new Date().toISOString(),
+        name,
+        type: 'task',
+        columnId,
+        description: ''
+      }
+      board.put(newTask).then(result => {
+        commit('CREATE_TASK', { result, name, columnId })
+        console.log('success task added to pouch')
       }).catch(error => {
         console.log(error)
       })
     }
   },
   mutations: {
-    CREATE_TASK (state, { tasks, name }) {
-      tasks.push({
-        name,
-        id: uuidv4(),
-        description: ''
+    CREATE_TASK (state, { result, name, columnId }) {
+      state.tasks.push({
+        doc: {
+          _id: result.id,
+          name,
+          type: 'task',
+          columnId,
+          description: ''
+        }
       })
     },
     UPDATE_TASK (state, { task, key, value }) {
@@ -72,16 +90,19 @@ export default new Vuex.Store({
       const columnToMove = columnList.splice(fromColumnIndex, 1)[0]
       columnList.splice(toColumnIndex, 0, columnToMove)
     },
-    CREATE_COLUMN (state, name) {
-      state.board.columns.push({
+    CREATE_COLUMN (state, { result, name }) {
+      state.columns.push({
         doc: {
+          _id: result.id,
           name,
-          tasks: []
+          type: 'column'
         }
       })
     },
-    SET_COLUMN (state, columns) {
-      state.board.columns = columns
+    SET_BOARD (state, data) {
+      data.map(item => {
+        item.doc.type === 'column' ? state.columns.push(item) : state.tasks.push(item)
+      })
     }
   }
 })
