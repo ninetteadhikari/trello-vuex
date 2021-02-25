@@ -61,7 +61,7 @@ npm install
 After running the command, you can open http://localhost:8080 to view the app in the browser.
 
 ```bash
-yarn run serve
+npm run serve
 ```
 
 The app is built using [VueMastery](https://www.vuemastery.com/) tutorials.
