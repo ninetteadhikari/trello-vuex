@@ -1,4 +1,4 @@
-# Trello app using Vue/Vuex
+# Trello app using Vue/Vuex and PouchDB/CouchDB
 
 ## About the project
 
@@ -37,10 +37,16 @@ After adding the key functionalities of the application, some code refactor was 
 - Components sharing duplicate data and methods like `moveTask` or `moveColumn` were separated into a `mixin`. Mixin is a Vue feature to distribute reusable functions across the application.
 - Another place of code redundancy was the drag and drop API code which is used for both the `BoardColumn` and `Task` components. Two separate reusable components were created for `AddDrag` and `AddDrop` functions. These were used whenever there was a need to drag and drop an element.
 
+### Setting up PouchDB and CouchDB
+
+The app was initially setup using LocalStorage option to store the data. Then later it was updated to setup PouchDB to allow for offline data storage. The data structure in the Vuex store had to be updated to align with PouchDB. The data structure was initially with lists and tasked nested as JSON. To align with PouchDB best practices the data structure was normalized to save the lists and tasks separately in the Vue store with listId add to each task for reference. The app components were updated to agree with the new state structure.
+CouchDB was then set up as a remote server to sync with the data in PouchDB. The local and remote sync can be tested by opening two browsers and seeing the changes made in one browser in the other.
+
 ## Built with
 
 - VueJS
 - Vuex for state management
+- PouchDB and CouchDB
 - [HTML drag and drop API](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API)
 - Tailwind for styling
 
