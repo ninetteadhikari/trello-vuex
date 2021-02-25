@@ -12,6 +12,7 @@
           v-for="(task, $taskIndex) of filteredTaskByColumnId()"
           :key="$taskIndex"
           :task="task"
+          :tasks="tasks"
           :taskIndex="$taskIndex"
           :column="column"
           :columnIndex="columnIndex"

@@ -26,7 +26,6 @@ export default {
       const testing = this.tasks.filter(task => {
         return task.doc._id === this.$route.params.id
       })
-      console.log('testing', testing)
       return testing
     }
   },

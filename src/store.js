@@ -59,9 +59,33 @@ export default new Vuex.Store({
       }).catch(error => {
         console.log(error)
       })
+    },
+    changeTaskColumn ({ commit }, { fromTasks, fromTaskIndex, toTasks, toTaskIndex, fromTaskId, toTaskColumnId }) {
+      board.get(fromTaskId).then(doc => {
+        doc.columnId = toTaskColumnId
+        return board.put(doc)
+      }).then(response => {
+        commit('MOVE_TASK', { fromTasks, fromTaskIndex, toTasks, toTaskIndex, toTaskColumnId })
+      }).catch(error => {
+        console.log(error)
+      })
     }
   },
   mutations: {
+    SET_BOARD (state, data) {
+      data.map(item => {
+        item.doc.type === 'column' ? state.columns.push(item) : state.tasks.push(item)
+      })
+    },
+    CREATE_COLUMN (state, { result, name }) {
+      state.columns.push({
+        doc: {
+          _id: result.id,
+          name,
+          type: 'column'
+        }
+      })
+    },
     CREATE_TASK (state, { result, name, columnId }) {
       state.tasks.push({
         doc: {
@@ -79,12 +103,13 @@ export default new Vuex.Store({
       })
       state.tasks[taskIndex].doc[key] = value
     },
-    MOVE_TASK (state, { fromTasks, toTasks, fromTaskIndex, toTaskIndex }) {
+    MOVE_TASK (state, { fromTasks, fromTaskIndex, toTasks, toTaskIndex, toTaskColumnId }) {
       const taskToMove = fromTasks.splice(fromTaskIndex, 1)[0]
+      taskToMove.doc.columnId = toTaskColumnId
       toTasks.splice(toTaskIndex, 0, taskToMove)
     },
     MOVE_COLUMN (state, { fromColumnIndex, toColumnIndex }) {
-      const columnList = state.board.columns
+      const columnList = state.columns
       const columnToMove = columnList.splice(fromColumnIndex, 1)[0]
       columnList.splice(toColumnIndex, 0, columnToMove)
     },
