@@ -43,7 +43,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['addColumn', 'fetchAllData']),
+    ...mapActions(['addColumn', 'fetchAllData', 'dbSync']),
     close () {
       this.$router.push({ name: 'board' })
     },
@@ -54,6 +54,7 @@ export default {
   },
   created () {
     this.fetchAllData()
+    this.dbSync()
   }
 }
 </script>

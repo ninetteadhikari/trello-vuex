@@ -9,6 +9,15 @@ Vue.use(Vuex)
 // const board = JSON.parse(localStorage.getItem('board')) || defaultBoard
 
 let board = new PouchDB('board')
+var remoteCouch = process.env.VUE_APP_COUCHDB_URL
+
+board.info((err, info) => {
+  board.changes({
+    since: info.update_seq,
+    live: true
+  }).on('change', this.fetchAllData)
+  console.log(err)
+})
 
 export default new Vuex.Store({
   plugins: [saveStatePlugin],
@@ -23,6 +32,10 @@ export default new Vuex.Store({
       }).catch(error => {
         console.log(error)
       })
+    },
+    dbSync () {
+      const opts = { live: true }
+      board.sync(remoteCouch, opts)
     },
     addColumn ({ commit }, name) {
       const newColumn = {
@@ -112,20 +125,6 @@ export default new Vuex.Store({
       const columnList = state.columns
       const columnToMove = columnList.splice(fromColumnIndex, 1)[0]
       columnList.splice(toColumnIndex, 0, columnToMove)
-    },
-    CREATE_COLUMN (state, { result, name }) {
-      state.columns.push({
-        doc: {
-          _id: result.id,
-          name,
-          type: 'column'
-        }
-      })
-    },
-    SET_BOARD (state, data) {
-      data.map(item => {
-        item.doc.type === 'column' ? state.columns.push(item) : state.tasks.push(item)
-      })
     }
   }
 })
