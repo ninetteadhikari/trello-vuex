@@ -8,14 +8,6 @@ Vue.use(Vuex)
 let board = new PouchDB('board')
 var remoteCouch = process.env.VUE_APP_COUCHDB_URL
 
-// board.info((err, info) => {
-//   board.changes({
-//     since: info.update_seq,
-//     live: true
-//   }).on('change', this.fetchAllData)
-//   console.log(err)
-// })
-
 export default new Vuex.Store({
   state: {
     columns: [],
@@ -29,9 +21,11 @@ export default new Vuex.Store({
         console.log(error)
       })
     },
-    async dbSync () {
+    async dbSync ({ dispatch }) {
       const opts = { live: true }
-      await board.sync(remoteCouch, opts)
+      await board.sync(remoteCouch, opts).on('change', () => {
+        dispatch('fetchAllData')
+      }).catch(err => console.log(err))
     },
     async addColumn ({ commit }, name) {
       const newColumn = {
@@ -83,27 +77,30 @@ export default new Vuex.Store({
   mutations: {
     SET_BOARD (state, data) {
       data.map(item => {
-        item.doc.type === 'column' ? state.columns.push(item.doc) : state.tasks.push(item.doc)
+        const columnIndex = state.columns.findIndex(column => column._id === item.doc._id)
+        const taskIndex = state.tasks.findIndex(task => task._id === item.doc._id)
+
+        if (columnIndex === -1 && taskIndex === -1) {
+          return item.doc.type === 'column' ? state.columns.push(item.doc) : state.tasks.push(item.doc)
+        }
       })
     },
     CREATE_COLUMN (state, { result, name }) {
       state.columns.push({
-        doc: {
+        name,
+        type: 'column',
           _id: result.id,
-          name,
-          type: 'column'
-        }
+        _rev: result.rev
       })
     },
     CREATE_TASK (state, { result, name, columnId }) {
       state.tasks.push({
-        doc: {
-          _id: result.id,
           name,
           type: 'task',
           columnId,
-          description: ''
-        }
+        description: '',
+        _id: result.id,
+        _rev: result.rev
       })
     },
     UPDATE_TASK (state, { taskId, key, value }) {
