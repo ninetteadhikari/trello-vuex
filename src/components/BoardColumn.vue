@@ -2,7 +2,7 @@
   <AppDrop @drop="moveTaskOrColumn">
     <AppDrag
       class="column"
-      :transferData="{ type: 'column', fromColumnIndex: columnIndex }"
+      :transferData="{ type: 'column', fromColumnIndex: columnIndex, columnId: column._id }"
     >
       <div class="flex items-center mb-2 font-bold">
         {{ column.name }}

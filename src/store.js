@@ -18,7 +18,6 @@ export default new Vuex.Store({
       await board
         .allDocs({ include_docs: true })
         .then(doc => {
-      await board.allDocs({ include_docs: true }).then(doc => {
           commit('SET_BOARD', doc.rows)
         })
         .catch(error => {
@@ -34,16 +33,18 @@ export default new Vuex.Store({
         })
         .catch(err => console.log(err))
     },
-    async addColumn ({ commit }, name) {
+    async addColumn ({ state, commit }, name) {
+      const newPosition = (state.columns.length + 1) / 10
       const newColumn = {
         _id: uuidv4(),
         name,
-        type: 'column'
+        type: 'column',
+        position: newPosition
       }
       await board
         .put(newColumn)
         .then(result => {
-          commit('CREATE_COLUMN', { result, name })
+          commit('CREATE_COLUMN', { result, name, newPosition })
         })
         .catch(error => {
           console.log(error)
@@ -67,7 +68,6 @@ export default new Vuex.Store({
         })
     },
     async editTask ({ commit }, { taskId, key, value }) {
-      await board.get(taskId).then(doc => {
       await board
         .get(taskId)
         .then(doc => {
@@ -80,6 +80,24 @@ export default new Vuex.Store({
         .catch(error => {
           console.log(error)
         })
+    },
+    async changeColumnPosition ({ state, commit }, { columnId, fromColumnIndex, toColumnIndex }) {
+      let newPosition
+      if (toColumnIndex > 0) {
+        newPosition = (state.columns[toColumnIndex - 1].position + state.columns[toColumnIndex].position) / 2
+      } else {
+        newPosition = (state.columns[toColumnIndex].position) / 2
+      }
+      await board
+        .get(columnId)
+        .then(doc => {
+          doc.position = newPosition
+          return board.put(doc)
+        })
+        .then(response => {
+          commit('MOVE_COLUMN', { fromColumnIndex, toColumnIndex, newPosition })
+        })
+        .catch(error => console.log(error))
     },
     async changeTaskColumn (
       { commit },
@@ -128,11 +146,13 @@ export default new Vuex.Store({
             : state.tasks.push(item.doc)
         }
       })
+      state.columns.sort((a, b) => a.position - b.position)
     },
-    CREATE_COLUMN (state, { result, name }) {
+    CREATE_COLUMN (state, { result, name, newPosition }) {
       state.columns.push({
         name,
         type: 'column',
+        position: newPosition,
         _id: result.id,
         _rev: result.rev
       })
@@ -157,7 +177,6 @@ export default new Vuex.Store({
       state,
       { fromTasks, fromTaskIndex, toTaskIndex, toTaskColumnId }
     ) {
-      
       const taskToMove = fromTasks.splice(fromTaskIndex, 1)[0]
       taskToMove.columnId = toTaskColumnId
 
@@ -167,10 +186,8 @@ export default new Vuex.Store({
 
       toTasks.splice(toTaskIndex, 0, taskToMove)
     },
-    MOVE_COLUMN (state, { fromColumnIndex, toColumnIndex }) {
-      const columnList = state.columns
-      const columnToMove = columnList.splice(fromColumnIndex, 1)[0]
-      columnList.splice(toColumnIndex, 0, columnToMove)
+    MOVE_COLUMN (state, { fromColumnIndex, toColumnIndex, newPosition }) {
+      state.columns[fromColumnIndex].position = newPosition
     }
   }
 })

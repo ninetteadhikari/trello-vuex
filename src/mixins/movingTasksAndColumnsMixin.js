@@ -19,7 +19,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['changeTaskColumn']),
+    ...mapActions(['changeTaskColumn', 'changeColumnPosition']),
     moveTaskOrColumn (transferData) {
       if (transferData.type === 'task') {
         this.moveTask(transferData)
@@ -41,8 +41,9 @@ export default {
         toTaskColumnId: this.column._id
       })
     },
-    moveColumn ({ fromColumnIndex }) {
-      this.$store.commit('MOVE_COLUMN', {
+    moveColumn ({ fromColumnIndex, columnId }) {
+      this.changeColumnPosition({
+        columnId,
         fromColumnIndex,
         toColumnIndex: this.columnIndex
       })
