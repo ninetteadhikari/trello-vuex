@@ -9,7 +9,7 @@
       </div>
       <div class="list-reset">
         <ColumnTask
-          v-for="(task, $taskIndex) of filteredTaskByColumnId()"
+          v-for="(task, $taskIndex) of filteredTasks"
           :key="$taskIndex"
           :task="task"
           :tasks="tasks"
@@ -54,6 +54,10 @@ export default {
     tasks: {
       type: Array,
       required: true
+    },
+    filteredTasks: {
+      type: Array,
+      required: true
     }
   },
   methods: {
@@ -62,11 +66,6 @@ export default {
       this.addTask({ name: e.target.value, columnId })
       // clear input
       e.target.value = ''
-    },
-    filteredTaskByColumnId () {
-      return this.tasks.filter(task => {
-        return task.columnId === this.column._id
-      })
     }
   }
 }

@@ -8,6 +8,7 @@
         :columnIndex="$columnIndex"
         :columns="columns"
         :tasks="tasks"
+        :filteredTasks="filterTaskByColumnId(column._id)"
       />
       <div class="column flex">
         <input
@@ -50,6 +51,11 @@ export default {
     createColumn () {
       this.addColumn(this.newColumnName)
       this.newColumnName = ''
+    },
+    filterTaskByColumnId (columnId) {
+      return this.tasks.filter(task => {
+        return task.columnId === columnId
+      })
     }
   },
   created () {
