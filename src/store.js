@@ -116,9 +116,14 @@ export default new Vuex.Store({
       })
       state.tasks[taskIndex].doc[key] = value
     },
-    MOVE_TASK (state, { fromTasks, fromTaskIndex, toTasks, toTaskIndex, toTaskColumnId }) {
+    MOVE_TASK (state, { fromTasks, fromTaskIndex, toTaskIndex, toTaskColumnId }) {
       const taskToMove = fromTasks.splice(fromTaskIndex, 1)[0]
       taskToMove.doc.columnId = toTaskColumnId
+
+      const toTasks = state.tasks.filter(
+        task => toTaskColumnId === task.doc.columnId
+      )
+
       toTasks.splice(toTaskIndex, 0, taskToMove)
     },
     MOVE_COLUMN (state, { fromColumnIndex, toColumnIndex }) {

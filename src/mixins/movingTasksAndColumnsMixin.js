@@ -31,15 +31,11 @@ export default {
       const fromTasks = this.tasks.filter(
         task => task.doc.columnId === this.columns[fromColumnIndex].doc._id
       )
-      const toTasks = this.tasks.filter(
-        task => this.column.doc._id === task.doc.columnId
-      )
       const fromTaskId = fromTasks[fromTaskIndex].doc._id
 
       this.changeTaskColumn({
         fromTasks,
         fromTaskIndex,
-        toTasks,
         toTaskIndex: this.taskIndex,
         fromTaskId,
         toTaskColumnId: this.column.doc._id
