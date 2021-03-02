@@ -5,7 +5,7 @@
       :transferData="{ type: 'column', fromColumnIndex: columnIndex }"
     >
       <div class="flex items-center mb-2 font-bold">
-        {{ column.doc.name }}
+        {{ column.name }}
       </div>
       <div class="list-reset">
         <ColumnTask
@@ -22,7 +22,7 @@
           type="text"
           class="block p-2 w-full bg-transparent"
           placeholder="+ Enter new task"
-          @keyup.enter="createTask($event, column.doc._id)"
+          @keyup.enter="createTask($event, column._id)"
         />
       </div>
     </AppDrag>
@@ -65,7 +65,7 @@ export default {
     },
     filteredTaskByColumnId () {
       return this.tasks.filter(task => {
-        return task.doc.columnId === this.column.doc._id
+        return task.columnId === this.column._id
       })
     }
   }

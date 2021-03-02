@@ -29,16 +29,16 @@ export default {
     },
     moveTask ({ fromColumnIndex, fromTaskIndex }) {
       const fromTasks = this.tasks.filter(
-        task => task.doc.columnId === this.columns[fromColumnIndex].doc._id
+        task => task.columnId === this.columns[fromColumnIndex]._id
       )
-      const fromTaskId = fromTasks[fromTaskIndex].doc._id
+      const fromTaskId = fromTasks[fromTaskIndex]._id
 
       this.changeTaskColumn({
         fromTasks,
         fromTaskIndex,
         toTaskIndex: this.taskIndex,
         fromTaskId,
-        toTaskColumnId: this.column.doc._id
+        toTaskColumnId: this.column._id
       })
     },
     moveColumn ({ fromColumnIndex }) {

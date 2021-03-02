@@ -10,10 +10,10 @@
       @click.native="goToTask(task)"
     >
       <span class="w-full flex-no-shrink font-bold">
-        {{ task.doc.name }}
+        {{ task.name }}
       </span>
-      <p v-if="task.doc.description" class="w-full flex-no-shrink mt-1 text-small">
-        {{ task.doc.description }}
+      <p v-if="task.description" class="w-full flex-no-shrink mt-1 text-small">
+        {{ task.description }}
       </p>
     </AppDrag>
   </AppDrop>
@@ -38,7 +38,7 @@ export default {
   },
   methods: {
     goToTask (task) {
-      this.$router.push({ name: 'task', params: { id: task.doc._id } })
+      this.$router.push({ name: 'task', params: { id: task._id } })
     }
   }
 }

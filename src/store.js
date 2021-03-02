@@ -83,7 +83,7 @@ export default new Vuex.Store({
   mutations: {
     SET_BOARD (state, data) {
       data.map(item => {
-        item.doc.type === 'column' ? state.columns.push(item) : state.tasks.push(item)
+        item.doc.type === 'column' ? state.columns.push(item.doc) : state.tasks.push(item.doc)
       })
     },
     CREATE_COLUMN (state, { result, name }) {
@@ -108,16 +108,16 @@ export default new Vuex.Store({
     },
     UPDATE_TASK (state, { taskId, key, value }) {
       const taskIndex = state.tasks.findIndex(task => {
-        return task.doc._id === taskId
+        return task._id === taskId
       })
-      state.tasks[taskIndex].doc[key] = value
+      state.tasks[taskIndex][key] = value
     },
     MOVE_TASK (state, { fromTasks, fromTaskIndex, toTaskIndex, toTaskColumnId }) {
       const taskToMove = fromTasks.splice(fromTaskIndex, 1)[0]
-      taskToMove.doc.columnId = toTaskColumnId
+      taskToMove.columnId = toTaskColumnId
 
       const toTasks = state.tasks.filter(
-        task => toTaskColumnId === task.doc.columnId
+        task => toTaskColumnId === task.columnId
       )
 
       toTasks.splice(toTaskIndex, 0, taskToMove)

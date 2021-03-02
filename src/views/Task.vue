@@ -3,15 +3,15 @@
     <div class="flex flex-col flex-grow items-start justify-between px-4">
       <input
         class="p-2 w-full mr-2 block text-xl font-bold"
-        :value="task[0].doc.name"
-        @key.enter="updateTaskProperty($event, 'name', task[0].doc._id)"
-        @change="updateTaskProperty($event, 'name', task[0].doc._id)"
+        :value="task[0].name"
+        @key.enter="updateTaskProperty($event, 'name', task[0]._id)"
+        @change="updateTaskProperty($event, 'name', task[0]._id)"
       />
       <textarea
         placeholder="Enter task description"
         class="relative w-full bg-transparent px-2 border mt-2 h-64 border-none leading-normal"
-        :value="task[0].doc.description"
-        @change="updateTaskProperty($event, 'description', task[0].doc._id)"
+        :value="task[0].description"
+        @change="updateTaskProperty($event, 'description', task[0]._id)"
       />
     </div>
   </div>
@@ -24,7 +24,7 @@ export default {
     ...mapState(['tasks']),
     task () {
       const testing = this.tasks.filter(task => {
-        return task.doc._id === this.$route.params.id
+        return task._id === this.$route.params.id
       })
       return testing
     }
