@@ -1,12 +1,9 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import PouchDB from 'pouchdb-browser'
-// import defaultBoard from './default-board'
-import { saveStatePlugin } from './utils'
+import { v4 as uuidv4 } from 'uuid'
 
 Vue.use(Vuex)
-
-// const board = JSON.parse(localStorage.getItem('board')) || defaultBoard
 
 let board = new PouchDB('board')
 var remoteCouch = process.env.VUE_APP_COUCHDB_URL
@@ -20,7 +17,6 @@ var remoteCouch = process.env.VUE_APP_COUCHDB_URL
 // })
 
 export default new Vuex.Store({
-  plugins: [saveStatePlugin],
   state: {
     columns: [],
     tasks: []
@@ -39,7 +35,7 @@ export default new Vuex.Store({
     },
     async addColumn ({ commit }, name) {
       const newColumn = {
-        _id: new Date().toISOString(),
+        _id: uuidv4(),
         name,
         type: 'column'
       }
@@ -51,7 +47,7 @@ export default new Vuex.Store({
     },
     async addTask ({ commit }, { name, columnId }) {
       const newTask = {
-        _id: new Date().toISOString(),
+        _id: uuidv4(),
         name,
         type: 'task',
         columnId,
