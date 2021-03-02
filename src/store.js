@@ -11,13 +11,13 @@ Vue.use(Vuex)
 let board = new PouchDB('board')
 var remoteCouch = process.env.VUE_APP_COUCHDB_URL
 
-board.info((err, info) => {
-  board.changes({
-    since: info.update_seq,
-    live: true
-  }).on('change', this.fetchAllData)
-  console.log(err)
-})
+// board.info((err, info) => {
+//   board.changes({
+//     since: info.update_seq,
+//     live: true
+//   }).on('change', this.fetchAllData)
+//   console.log(err)
+// })
 
 export default new Vuex.Store({
   plugins: [saveStatePlugin],
@@ -26,30 +26,30 @@ export default new Vuex.Store({
     tasks: []
   },
   actions: {
-    fetchAllData ({ commit }) {
-      board.allDocs({ include_docs: true }).then(doc => {
+    async fetchAllData ({ commit }) {
+      await board.allDocs({ include_docs: true }).then(doc => {
         commit('SET_BOARD', doc.rows)
       }).catch(error => {
         console.log(error)
       })
     },
-    dbSync () {
+    async dbSync () {
       const opts = { live: true }
-      board.sync(remoteCouch, opts)
+      await board.sync(remoteCouch, opts)
     },
-    addColumn ({ commit }, name) {
+    async addColumn ({ commit }, name) {
       const newColumn = {
         _id: new Date().toISOString(),
         name,
         type: 'column'
       }
-      board.put(newColumn).then(result => {
+      await board.put(newColumn).then(result => {
         commit('CREATE_COLUMN', { result, name })
       }).catch(error => {
         console.log(error)
       })
     },
-    addTask ({ commit }, { name, columnId }) {
+    async addTask ({ commit }, { name, columnId }) {
       const newTask = {
         _id: new Date().toISOString(),
         name,
@@ -57,14 +57,14 @@ export default new Vuex.Store({
         columnId,
         description: ''
       }
-      board.put(newTask).then(result => {
+      await board.put(newTask).then(result => {
         commit('CREATE_TASK', { result, name, columnId })
       }).catch(error => {
         console.log(error)
       })
     },
-    editTask ({ commit }, { taskId, key, value }) {
-      board.get(taskId).then(doc => {
+    async editTask ({ commit }, { taskId, key, value }) {
+      await board.get(taskId).then(doc => {
         doc[key] = value
         return board.put(doc)
       }).then(response => {
@@ -73,8 +73,8 @@ export default new Vuex.Store({
         console.log(error)
       })
     },
-    changeTaskColumn ({ commit }, { fromTasks, fromTaskIndex, toTasks, toTaskIndex, fromTaskId, toTaskColumnId }) {
-      board.get(fromTaskId).then(doc => {
+    async changeTaskColumn ({ commit }, { fromTasks, fromTaskIndex, toTasks, toTaskIndex, fromTaskId, toTaskColumnId }) {
+      await board.get(fromTaskId).then(doc => {
         doc.columnId = toTaskColumnId
         return board.put(doc)
       }).then(response => {
