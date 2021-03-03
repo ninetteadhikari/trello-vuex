@@ -88,14 +88,19 @@ export default new Vuex.Store({
       { columnId, fromColumnIndex, toColumnIndex }
     ) {
       let newPosition
-      if (toColumnIndex > 0) {
+      if (toColumnIndex === 0) {
+        newPosition = state.columns[toColumnIndex].position / 2
+      } else if (toColumnIndex > 0 && toColumnIndex < state.columns.length - 1) {
         newPosition =
           (state.columns[toColumnIndex - 1].position +
             state.columns[toColumnIndex].position) /
           2
       } else {
-        newPosition = state.columns[toColumnIndex].position / 2
+        newPosition =
+        (state.columns[toColumnIndex].position + ((state.columns.length + 1) / 10)) /
+        2
       }
+
       await board
         .get(columnId)
         .then(doc => {
@@ -129,7 +134,9 @@ export default new Vuex.Store({
             toTasks[toTaskIndex].position) /
           2
       } else {
-        newPosition = toTasks[toTaskIndex].position + 0.1
+        newPosition =
+        (toTasks[toTaskIndex].position + ((toTasks.length + 1) / 10)) /
+        2
       }
 
       await board
