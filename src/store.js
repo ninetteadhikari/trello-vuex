@@ -129,7 +129,7 @@ export default new Vuex.Store({
             toTasks[toTaskIndex].position) /
           2
       } else {
-        newPosition = (toTasks.length + 1) / 10
+        newPosition = toTasks[toTaskIndex].position + 0.1
       }
 
       await board
