@@ -27,8 +27,9 @@ export default {
         this.moveColumn(transferData)
       }
     },
-    moveTask ({ fromTaskId }) {
+    moveTask ({ fromTaskIndex, fromTaskId }) {
       this.changeTaskPosition({
+        fromTaskIndex,
         toTaskIndex: this.taskIndex,
         fromTaskId,
         toTaskColumnId: this.column._id

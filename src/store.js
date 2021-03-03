@@ -90,14 +90,16 @@ export default new Vuex.Store({
       let newPosition
       if (toColumnIndex === 0) {
         newPosition = state.columns[toColumnIndex].position / 2
-      } else if (toColumnIndex > 0 && toColumnIndex < state.columns.length - 1) {
+      } else if (toColumnIndex === state.columns.length - 1) {
         newPosition =
-          (state.columns[toColumnIndex - 1].position +
-            state.columns[toColumnIndex].position) /
+          (state.columns[toColumnIndex].position + (state.columns.length + 1) / 10) / 2
+      } else if (fromColumnIndex < toColumnIndex) {
+        newPosition =
+        (state.columns[toColumnIndex + 1].position + state.columns[toColumnIndex].position) /
           2
-      } else {
+      } else if (fromColumnIndex > toColumnIndex) {
         newPosition =
-        (state.columns[toColumnIndex].position + ((state.columns.length + 1) / 10)) /
+        (state.columns[toColumnIndex - 1].position + state.columns[toColumnIndex].position) /
         2
       }
 
@@ -117,7 +119,7 @@ export default new Vuex.Store({
     },
     async changeTaskPosition (
       { state, commit },
-      { toTaskIndex, fromTaskId, toTaskColumnId }
+      { fromTaskIndex, toTaskIndex, fromTaskId, toTaskColumnId }
     ) {
       const toTasks = state.tasks.filter(
         task => toTaskColumnId === task.columnId
@@ -128,14 +130,16 @@ export default new Vuex.Store({
         newPosition = 0.1
       } else if (toTaskIndex === 0) {
         newPosition = toTasks[toTaskIndex].position / 2
-      } else if (toTaskIndex > 0 && toTaskIndex < toTasks.length - 1) {
+      } else if (toTaskIndex === toTasks.length - 1) {
         newPosition =
-          (toTasks[toTaskIndex - 1].position +
-            toTasks[toTaskIndex].position) /
+          (toTasks[toTaskIndex].position + (toTasks.length + 1) / 10) / 2
+      } else if (fromTaskIndex < toTaskIndex) {
+        newPosition =
+        (toTasks[toTaskIndex + 1].position + toTasks[toTaskIndex].position) /
           2
-      } else {
+      } else if (fromTaskIndex > toTaskIndex) {
         newPosition =
-        (toTasks[toTaskIndex].position + ((toTasks.length + 1) / 10)) /
+        (toTasks[toTaskIndex - 1].position + toTasks[toTaskIndex].position) /
         2
       }
 
@@ -169,9 +173,13 @@ export default new Vuex.Store({
         )
 
         if (columnIndex === -1 && taskIndex === -1) {
-          return item.doc.type === 'column'
+          item.doc.type === 'column'
             ? state.columns.push(item.doc)
             : state.tasks.push(item.doc)
+        } else {
+          item.doc.type === 'column'
+            ? state.columns[columnIndex] = item.doc
+            : state.tasks[taskIndex] = item.doc
         }
       })
       state.columns.sort((a, b) => a.position - b.position)

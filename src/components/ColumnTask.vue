@@ -4,6 +4,7 @@
       class="task"
       :transferData="{
         type: 'task',
+        fromTaskIndex: taskIndex,
         fromTaskId: task._id
       }"
       @click.native="goToTask(task)"
