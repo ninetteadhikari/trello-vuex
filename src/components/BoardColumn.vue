@@ -22,7 +22,7 @@
           type="text"
           class="block p-2 w-full bg-transparent"
           placeholder="+ Enter new task"
-          @keyup.enter="createTask($event, column._id)"
+          @keyup.enter="createTask($event, column._id, filteredTasks)"
         />
       </div>
     </AppDrag>
@@ -62,8 +62,8 @@ export default {
   },
   methods: {
     ...mapActions(['addTask']),
-    createTask (e, columnId) {
-      this.addTask({ name: e.target.value, columnId })
+    createTask (e, columnId, filteredTasks) {
+      this.addTask({ name: e.target.value, columnId, filteredTasks })
       // clear input
       e.target.value = ''
     }

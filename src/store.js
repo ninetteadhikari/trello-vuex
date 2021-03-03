@@ -50,18 +50,20 @@ export default new Vuex.Store({
           console.log(error)
         })
     },
-    async addTask ({ commit }, { name, columnId }) {
+    async addTask ({ commit }, { name, columnId, filteredTasks }) {
+      const newPosition = (filteredTasks.length + 1) / 10
       const newTask = {
         _id: uuidv4(),
         name,
         type: 'task',
         columnId,
-        description: ''
+        description: '',
+        position: newPosition
       }
       await board
         .put(newTask)
         .then(result => {
-          commit('CREATE_TASK', { result, name, columnId })
+          commit('CREATE_TASK', { result, name, columnId, newPosition })
         })
         .catch(error => {
           console.log(error)
@@ -81,12 +83,18 @@ export default new Vuex.Store({
           console.log(error)
         })
     },
-    async changeColumnPosition ({ state, commit }, { columnId, fromColumnIndex, toColumnIndex }) {
+    async changeColumnPosition (
+      { state, commit },
+      { columnId, fromColumnIndex, toColumnIndex }
+    ) {
       let newPosition
       if (toColumnIndex > 0) {
-        newPosition = (state.columns[toColumnIndex - 1].position + state.columns[toColumnIndex].position) / 2
+        newPosition =
+          (state.columns[toColumnIndex - 1].position +
+            state.columns[toColumnIndex].position) /
+          2
       } else {
-        newPosition = (state.columns[toColumnIndex].position) / 2
+        newPosition = state.columns[toColumnIndex].position / 2
       }
       await board
         .get(columnId)
@@ -95,34 +103,47 @@ export default new Vuex.Store({
           return board.put(doc)
         })
         .then(response => {
-          commit('MOVE_COLUMN', { fromColumnIndex, toColumnIndex, newPosition })
+          commit('MOVE_COLUMN', {
+            fromColumnIndex,
+            newPosition
+        })
         })
         .catch(error => console.log(error))
     },
-    async changeTaskColumn (
-      { commit },
-      {
-        fromTasks,
-        fromTaskIndex,
-        toTasks,
-        toTaskIndex,
-        fromTaskId,
-        toTaskColumnId
-      }
+    async changeTaskPosition (
+      { state, commit },
+      { toTaskIndex, fromTaskId, toTaskColumnId }
     ) {
+      const toTasks = state.tasks.filter(
+        task => toTaskColumnId === task.columnId
+      )
+
+      let newPosition
+      if (toTasks.length === 0) {
+        newPosition = 0.1
+      } else if (toTaskIndex === 0) {
+        newPosition = toTasks[toTaskIndex].position / 2
+      } else if (toTaskIndex > 0 && toTaskIndex < toTasks.length - 1) {
+        newPosition =
+          (toTasks[toTaskIndex - 1].position +
+            toTasks[toTaskIndex].position) /
+          2
+      } else {
+        newPosition = (toTasks.length + 1) / 10
+      }
+
       await board
         .get(fromTaskId)
         .then(doc => {
           doc.columnId = toTaskColumnId
+          doc.position = newPosition
           return board.put(doc)
         })
         .then(response => {
           commit('MOVE_TASK', {
-            fromTasks,
-            fromTaskIndex,
-            toTasks,
-            toTaskIndex,
-            toTaskColumnId
+            toTaskColumnId,
+            fromTaskId,
+            newPosition
           })
         })
         .catch(error => {
@@ -147,6 +168,7 @@ export default new Vuex.Store({
         }
       })
       state.columns.sort((a, b) => a.position - b.position)
+      state.tasks.sort((a, b) => a.position - b.position)
     },
     CREATE_COLUMN (state, { result, name, newPosition }) {
       state.columns.push({
@@ -157,12 +179,13 @@ export default new Vuex.Store({
         _rev: result.rev
       })
     },
-    CREATE_TASK (state, { result, name, columnId }) {
+    CREATE_TASK (state, { result, name, columnId, newPosition }) {
       state.tasks.push({
         name,
         type: 'task',
         columnId,
         description: '',
+        position: newPosition,
         _id: result.id,
         _rev: result.rev
       })
@@ -175,18 +198,16 @@ export default new Vuex.Store({
     },
     MOVE_TASK (
       state,
-      { fromTasks, fromTaskIndex, toTaskIndex, toTaskColumnId }
+      { toTaskColumnId, fromTaskId, newPosition }
     ) {
-      const taskToMove = fromTasks.splice(fromTaskIndex, 1)[0]
-      taskToMove.columnId = toTaskColumnId
-
-      const toTasks = state.tasks.filter(
-        task => toTaskColumnId === task.columnId
-      )
-
-      toTasks.splice(toTaskIndex, 0, taskToMove)
+      state.tasks.map(task => {
+        if (task._id === fromTaskId) {
+          task.columnId = toTaskColumnId
+          task.position = newPosition
+        }
+      })
     },
-    MOVE_COLUMN (state, { fromColumnIndex, toColumnIndex, newPosition }) {
+    MOVE_COLUMN (state, { fromColumnIndex, newPosition }) {
       state.columns[fromColumnIndex].position = newPosition
     }
   }

@@ -19,7 +19,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['changeTaskColumn', 'changeColumnPosition']),
+    ...mapActions(['changeTaskPosition', 'changeColumnPosition']),
     moveTaskOrColumn (transferData) {
       if (transferData.type === 'task') {
         this.moveTask(transferData)
@@ -27,15 +27,8 @@ export default {
         this.moveColumn(transferData)
       }
     },
-    moveTask ({ fromColumnIndex, fromTaskIndex }) {
-      const fromTasks = this.tasks.filter(
-        task => task.columnId === this.columns[fromColumnIndex]._id
-      )
-      const fromTaskId = fromTasks[fromTaskIndex]._id
-
-      this.changeTaskColumn({
-        fromTasks,
-        fromTaskIndex,
+    moveTask ({ fromTaskId }) {
+      this.changeTaskPosition({
         toTaskIndex: this.taskIndex,
         fromTaskId,
         toTaskColumnId: this.column._id
