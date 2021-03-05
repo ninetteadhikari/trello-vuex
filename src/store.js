@@ -29,6 +29,7 @@ export default new Vuex.Store({
         .on('change', () => {
           dispatch('fetchAllData')
         })
+        .on('error', (error) => console.log(error))
     },
     async addColumn ({ state, commit }, name) {
       try {
