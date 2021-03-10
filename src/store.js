@@ -148,21 +148,36 @@ export default new Vuex.Store({
   mutations: {
     SET_BOARD (state, data) {
       data.map(item => {
+        switch (item.doc.type) {
+          // Set column state
+          case 'column':
         const columnIndex = state.columns.findIndex(
           column => column._id === item.doc._id
         )
+            if (columnIndex === -1) {
+              // Add new column
+              state.columns.push(item.doc)
+            } else {
+              // Replace existing column
+              state.columns[columnIndex] = item.doc
+            }
+            state.columns.sort((a, b) => a.position - b.position)
+            break
+
+          // Set task state
+          case 'task':
         const taskIndex = state.tasks.findIndex(
           task => task._id === item.doc._id
         )
-
-        if (columnIndex === -1 && taskIndex === -1) {
-          item.doc.type === 'column'
-            ? state.columns.push(item.doc)
-            : state.tasks.push(item.doc)
+            if (taskIndex === -1) {
+              // Add new task
+              state.tasks.push(item.doc)
         } else {
-          item.doc.type === 'column'
-            ? state.columns[columnIndex] = item.doc
-            : state.tasks[taskIndex] = item.doc
+              // Replace existing task
+              state.tasks[taskIndex] = item.doc
+            }
+            state.tasks.sort((a, b) => a.position - b.position)
+            break
         }
       })
 
