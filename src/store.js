@@ -180,9 +180,6 @@ export default new Vuex.Store({
             break
         }
       })
-
-      state.columns.sort((a, b) => a.position - b.position)
-      state.tasks.sort((a, b) => a.position - b.position)
     },
     CREATE_COLUMN (state, { result, name, newPosition }) {
       state.columns.push({
