@@ -33,6 +33,14 @@ export default new Vuex.Store({
     },
     async addColumn ({ state, commit }, name) {
       try {
+        /* COLUMN POSITION
+        A position attribute is added for each new column created.
+        Each position is given a float number instead of an integer.
+        This allows for ordering of the list without having to update the positions of the adjoining items.
+        The float number for the position is calculated by incrementing the column array length by one and
+        dividing by 10 yielding a series of float position like 0.1, 0.2, 0.3 etc.
+        Reference: http://guide.couchdb.org/draft/recipes.html#ordering */
+
         const newPosition = (state.columns.length + 1) / 10
         const newColumn = {
           _id: uuidv4(),
@@ -48,6 +56,12 @@ export default new Vuex.Store({
     },
     async addTask ({ commit }, { name, columnId, filteredTasks }) {
       try {
+        /* TASK POSITION
+        The task position is calculated in the exact same way as the column
+        position as explained in the `addColumn` action above.
+        For tasks instead of taking the entire tasks array length, the length of the tasks filtered by the selected column is taken.
+        This allows for the task to be sorted per column. */
+
         const newPosition = (filteredTasks.length + 1) / 10
         const newTask = {
           _id: uuidv4(),
