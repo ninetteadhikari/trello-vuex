@@ -11,7 +11,8 @@ var remoteCouch = process.env.VUE_APP_COUCHDB_URL
 export default new Vuex.Store({
   state: {
     columns: [],
-    tasks: []
+    tasks: [],
+    taskHasConflict: false
   },
   actions: {
     async fetchAllData ({ commit }) {
@@ -77,12 +78,21 @@ export default new Vuex.Store({
         console.log(error)
       }
     },
-    async editTask ({ commit }, { taskId, key, value }) {
+    async editTask ({ state, commit }, { taskId, key, value }) {
+      // TODO: need to revisit to ensure simultaneous editing is addressed (need to make use of 'rev'/ or use full task object)
       try {
         const doc = await board.get(taskId)
-        doc[key] = value
-        const response = await board.put(doc)
-        commit('UPDATE_TASK', { taskId, key, value })
+        // TODO: add logic if rev is different
+        const editedTask = state.tasks.filter(task => task._id === taskId)
+        const isTaskRevSame = editedTask[0]._rev === doc._rev
+
+        if (isTaskRevSame) {
+          doc[key] = value
+          await board.put(doc)
+          commit('UPDATE_TASK', { taskId, key, value })
+        } else {
+          commit('ALERT_TASK_CONFLICT')
+        }
       } catch (error) {
         console.log(error)
       }
@@ -195,13 +205,14 @@ export default new Vuex.Store({
   },
   mutations: {
     SET_BOARD (state, data) {
+      // TODO: separate the code by column and task
       data.map(item => {
         switch (item.doc.type) {
           // Set column state
           case 'column':
-        const columnIndex = state.columns.findIndex(
-          column => column._id === item.doc._id
-        )
+            const columnIndex = state.columns.findIndex(
+              column => column._id === item.doc._id
+            )
             if (columnIndex === -1) {
               // Add new column if column doesn't exist
               state.columns.push(item.doc)
@@ -214,13 +225,13 @@ export default new Vuex.Store({
 
           // Set task state
           case 'task':
-        const taskIndex = state.tasks.findIndex(
-          task => task._id === item.doc._id
-        )
+            const taskIndex = state.tasks.findIndex(
+              task => task._id === item.doc._id
+            )
             if (taskIndex === -1) {
               // Add new task
               state.tasks.push(item.doc)
-        } else {
+            } else {
               // Replace existing task
               state.tasks[taskIndex] = item.doc
             }
@@ -254,6 +265,9 @@ export default new Vuex.Store({
         return task._id === taskId
       })
       state.tasks[taskIndex][key] = value
+    },
+    ALERT_TASK_CONFLICT (state) {
+      state.taskHasConflict = true
     },
     MOVE_TASK (
       state,
