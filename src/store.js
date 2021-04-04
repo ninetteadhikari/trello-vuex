@@ -8,6 +8,47 @@ Vue.use(Vuex)
 let board = new PouchDB('board')
 var remoteCouch = process.env.VUE_APP_COUCHDB_URL
 
+const setNewPosition = (toList, toIndex, fromIndex) => {
+  let newPosition
+
+  const listLength = toList.length
+  const isColumnEmpty = listLength === 0
+
+  let toItem
+  isColumnEmpty ? toItem = [] : toItem = toList[toIndex]
+
+  const toPosition = toItem.position
+
+  const isIndexFirst = toIndex === 0
+  const isIndexLast = toIndex === listLength - 1
+
+  if (isColumnEmpty) {
+    // Scenario 1: When a task is moved to an empty column
+    newPosition = 0.1
+  } else if (isIndexFirst) {
+    // Scenario 1: When a column is moved to the first position
+    newPosition = toPosition / 2
+  } else if (isIndexLast) {
+    // Scenario 2: When a column is moved to the last position
+    const nextToLastPosition = (listLength + 1) / 10
+    newPosition = (toPosition + nextToLastPosition) / 2
+  } else if (fromIndex < toIndex) {
+    // Scenario 3: When a column is moved from left to right
+    const nextItem = toList[toIndex + 1]
+    const nextItemPosition = nextItem.position
+    newPosition = (nextItemPosition + toPosition) / 2
+  } else if (fromIndex > toIndex) {
+    // Scenario 4: When a column is moved from right to left
+    const previousItem = toList[toIndex - 1]
+    const previousItemPosition = previousItem.position
+    newPosition = (previousItemPosition + toPosition) / 2
+  } else if (fromIndex === toIndex) {
+    // Scenario 5: When a column is moved and returned to same place
+    newPosition = toPosition
+  }
+  return newPosition
+}
+
 export default new Vuex.Store({
   state: {
     columns: [],
@@ -30,16 +71,17 @@ export default new Vuex.Store({
         .on('change', () => {
           dispatch('fetchAllData')
         })
-        .on('error', (error) => console.log(error))
+        .on('error', error => console.log(error))
     },
+
     async addColumn ({ state, commit }, name) {
       try {
-        /* COLUMN POSITION
-        A position attribute is added for each new column created.
-        Each position is given a float number instead of an integer.
-        This allows for ordering of the list without having to update the positions of the adjoining items.
-        The float number for the position is calculated by incrementing the column array length by one and
-        dividing by 10 yielding a series of float position like 0.1, 0.2, 0.3 etc.
+        /* COLUMN POSITION A position attribute is added for each new column
+        created. Each position is given a float number instead of an integer.
+        This allows for ordering of the list without having to update the
+        positions of the adjoining items. The float number for the position is
+        calculated by incrementing the column array length by one and dividing
+        by 10 yielding a series of float position like 0.1, 0.2, 0.3 etc.
         Reference: http://guide.couchdb.org/draft/recipes.html#ordering */
 
         const newPosition = (state.columns.length + 1) / 10
@@ -57,11 +99,11 @@ export default new Vuex.Store({
     },
     async addTask ({ commit }, { name, columnId, filteredTasks }) {
       try {
-        /* TASK POSITION
-        The task position is calculated in the exact same way as the column
-        position as explained in the `addColumn` action above.
-        For tasks instead of taking the entire tasks array length, the length of the tasks filtered by the selected column is taken.
-        This allows for the task to be sorted per column. */
+        /* TASK POSITION The task position is calculated in the exact same way
+        as the column position as explained in the `addColumn` action above. For
+        tasks instead of taking the entire tasks array length, the length of the
+        tasks filtered by the selected column is taken. This allows for the task
+        to be sorted per column. */
 
         const newPosition = (filteredTasks.length + 1) / 10
         const newTask = {
@@ -82,7 +124,6 @@ export default new Vuex.Store({
       // TODO: need to revisit to ensure simultaneous editing is addressed (need to make use of 'rev'/ or use full task object)
       try {
         const doc = await board.get(taskId)
-        // TODO: add logic if rev is different
         const editedTask = state.tasks.filter(task => task._id === taskId)
         const isTaskRevSame = editedTask[0]._rev === doc._rev
 
@@ -97,43 +138,19 @@ export default new Vuex.Store({
         console.log(error)
       }
     },
+
     async changeColumnPosition (
-      { state, commit },
+      { state, commit, dispatch },
       { columnId, fromColumnIndex, toColumnIndex }
     ) {
       try {
-        let newPosition
-
-        const toColumn = state.columns[toColumnIndex]
-        const toColumnPosition = toColumn.position
-        const columnLength = state.columns.length
-
-        const isColumnIndexFirst = toColumnIndex === 0
-        const isColumnIndexLast = toColumnIndex === columnLength - 1
-
-        /* NEW POSITION
-        The new position of the column that is moved, is the median of the position
-        of the two surrounding columns. */
-
-        if (isColumnIndexFirst) {
-          // Scenario 1: When a column is moved to the first position
-          newPosition = toColumnPosition / 2
-        } else if (isColumnIndexLast) {
-          // Scenario 2: When a column is moved to the last position
-          const nextToLastColumnPosition = (columnLength + 1) / 10
-          newPosition = (toColumnPosition + nextToLastColumnPosition) / 2
-        } else if (fromColumnIndex < toColumnIndex) {
-          // Scenario 3: When a column is moved from left to right
-          const nextColumn = state.columns[toColumnIndex + 1]
-          const nextColumnPosition = nextColumn.position
-          newPosition = (nextColumnPosition + toColumnPosition) / 2
-        } else if (fromColumnIndex > toColumnIndex) {
-          // Scenario 4: When a column is moved from right to left
-          const previousColumn = state.columns[toColumnIndex - 1]
-          const previousColumnPosition = previousColumn.position
-          newPosition = (previousColumnPosition + toColumnPosition) / 2
-        }
-
+        /* NEW POSITION The new position of the column that is moved, is the
+        median of the position of the two surrounding columns. */
+        /* setNewPosition is an implicit dependency on the changing the position
+        in the database. this causes a implicit side effect. having the
+        setNewPosition as a function shows the dependency clearly. */
+        // TODO: remove the state assignment from the setNewPosition. the state for position is unnecessary
+        const newPosition = setNewPosition(state.columns, toColumnIndex, fromColumnIndex)
         const doc = await board.get(columnId)
         doc.position = newPosition
         await board.put(doc)
@@ -146,48 +163,17 @@ export default new Vuex.Store({
       }
     },
     async changeTaskPosition (
-      { state, commit },
+      { state, commit, dispatch },
       { fromTaskIndex, toTaskIndex, fromTaskId, toTaskColumnId }
     ) {
       try {
-        let newPosition
-
         const toTasksList = state.tasks.filter(
           task => toTaskColumnId === task.columnId
         )
-        const toTask = toTasksList[toTaskIndex]
-        const toTaskPosition = toTask.position
-        const taskLength = toTasksList.length
 
-        const isColumnEmpty = taskLength === 0
-        const isTaskIndexFirst = toTaskIndex === 0
-        const isTaskIndexLast = toTaskIndex === taskLength - 1
-
-        /* NEW POSITION
-        The new position of the task that is moved, is the median of the position
-        of the two surrounding tasks. */
-
-        if (isColumnEmpty) {
-          // Scenario 1: When a task is moved to an empty column
-          newPosition = 0.1
-        } else if (isTaskIndexFirst) {
-          // Scenario 2: When a task is moved to the first position
-          newPosition = toTaskPosition / 2
-        } else if (isTaskIndexLast) {
-          // Scenario 3: When a task is moved to the last position
-          const nextToLastTaskPosition = (taskLength + 1) / 10
-          newPosition = (toTaskPosition + nextToLastTaskPosition) / 2
-        } else if (fromTaskIndex < toTaskIndex) {
-          // Scenario 4: When a task is moved from top to bottom
-          const nextTask = toTasksList[toTaskIndex + 1]
-          const nextTaskPosition = nextTask.position
-          newPosition = (nextTaskPosition + toTaskPosition) / 2
-        } else if (fromTaskIndex > toTaskIndex) {
-          // Scenario 5: When a task is moved from bottom to top
-          const previousTask = toTasksList[toTaskIndex - 1]
-          const previousTaskPosition = previousTask.position
-          newPosition = (previousTaskPosition + toTaskPosition) / 2
-        }
+        /* NEW POSITION The new position of the task that is moved, is the
+        median of the position of the two surrounding tasks. */
+        const newPosition = setNewPosition(state, toTasksList, toTaskIndex, fromTaskIndex)
 
         const doc = await board.get(fromTaskId)
         doc.columnId = toTaskColumnId
@@ -205,39 +191,50 @@ export default new Vuex.Store({
   },
   mutations: {
     SET_BOARD (state, data) {
-      // TODO: separate the code by column and task
-      data.map(item => {
-        switch (item.doc.type) {
-          // Set column state
-          case 'column':
-            const columnIndex = state.columns.findIndex(
-              column => column._id === item.doc._id
-            )
-            if (columnIndex === -1) {
-              // Add new column if column doesn't exist
-              state.columns.push(item.doc)
-            } else {
-              // Replace existing column
-              state.columns[columnIndex] = item.doc
-            }
-            state.columns.sort((a, b) => a.position - b.position)
-            break
-
-          // Set task state
-          case 'task':
-            const taskIndex = state.tasks.findIndex(
-              task => task._id === item.doc._id
-            )
-            if (taskIndex === -1) {
-              // Add new task
-              state.tasks.push(item.doc)
-            } else {
-              // Replace existing task
-              state.tasks[taskIndex] = item.doc
-            }
-            state.tasks.sort((a, b) => a.position - b.position)
-            break
+      // TODO: Refactor to make code simpler to use explicit if-else
+      const setData = (docType, item, state) => {
+        // TODO: make the itemstate a const and convert to separate function
+        //  Get the column or task list from state
+        const getItemState = (docType) => {
+          if (docType === 'column') {
+            return state.columns
+          } else {
+            return state.tasks
+          }
         }
+        const itemState = getItemState(docType)
+
+        //  Find column or task index
+        // TODO: do similar refactor as the sort byPosition
+        const matchItemId = (value) => value._id === item.doc._id
+        const index = itemState.findIndex(matchItemId)
+        // const findItemIndex = (items) => {
+        //   return items.findIndex(data => data._id === item.doc._id)
+        // }
+        // const index = findItemIndex(itemState)
+
+        // TODO: better to make it if-else for clarity
+        const itemExists = index !== -1 // TODO: maybe overkill to create a new variable
+        if (itemExists) {
+          // Replace existing column or task if item exits
+          itemState[index] = item.doc
+        } else {
+          // Add new column or task if it doesn't exist
+          itemState.push(item.doc)
+        }
+        //  Sort column or task
+        // TODO: add a function eg. byPosition to separate
+        // TODO: the byPosition just does the position sort and be a utility function used across the app
+        const sortByPosition = (a, b) => a.position - b.position
+        itemState.sort(sortByPosition)
+        // const sortByPosition = (items) => {
+        //   items.sort((a, b) => a.position - b.position)
+        // }
+        // sortByPosition(itemState)
+      }
+
+      data.map(item => {
+        setData(item.doc.type, item, state)
       })
     },
     CREATE_COLUMN (state, { result, name, newPosition }) {
@@ -269,10 +266,7 @@ export default new Vuex.Store({
     ALERT_TASK_CONFLICT (state) {
       state.taskHasConflict = true
     },
-    MOVE_TASK (
-      state,
-      { toTaskColumnId, fromTaskId, newPosition }
-    ) {
+    MOVE_TASK (state, { toTaskColumnId, fromTaskId, newPosition }) {
       state.tasks.map(task => {
         if (task._id === fromTaskId) {
           task.columnId = toTaskColumnId
