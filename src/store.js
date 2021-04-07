@@ -58,10 +58,10 @@ export default new Vuex.Store({
   actions: {
     async fetchAllData ({ commit }) {
       try {
-        const doc = await board.allDocs({ include_docs: true })
+        const doc = await board.allDocs({ include_docs: true, conflicts: true })
         commit('SET_BOARD', doc.rows)
       } catch (error) {
-        console.log(error)
+        console.error(error)
       }
     },
     dbSync ({ dispatch }) {
@@ -71,7 +71,7 @@ export default new Vuex.Store({
         .on('change', () => {
           dispatch('fetchAllData')
         })
-        .on('error', error => console.log(error))
+        .on('error', error => console.error(error))
     },
 
     async addColumn ({ state, commit }, name) {
@@ -94,7 +94,7 @@ export default new Vuex.Store({
         const result = await board.put(newColumn)
         commit('CREATE_COLUMN', { result, name, newPosition })
       } catch (error) {
-        console.log(error)
+        console.error(error)
       }
     },
     async addTask ({ commit }, { name, columnId, filteredTasks }) {
@@ -117,11 +117,11 @@ export default new Vuex.Store({
         const result = await board.put(newTask)
         commit('CREATE_TASK', { result, name, columnId, newPosition })
       } catch (error) {
-        console.log(error)
+        console.error(error)
       }
     },
     async editTask ({ state, commit }, { taskId, key, value }) {
-      // TODO: need to revisit to ensure simultaneous editing is addressed (need to make use of 'rev'/ or use full task object)
+      // Conflict handling. Reference: https://pouchdb.com/guides/conflicts.html
       try {
         const doc = await board.get(taskId)
         const editedTask = state.tasks.filter(task => task._id === taskId)
@@ -140,7 +140,7 @@ export default new Vuex.Store({
     },
 
     async changeColumnPosition (
-      { state, commit, dispatch },
+      { state, commit },
       { columnId, fromColumnIndex, toColumnIndex }
     ) {
       try {
@@ -159,11 +159,11 @@ export default new Vuex.Store({
           newPosition
         })
       } catch (error) {
-        console.log(error)
+        console.error(error)
       }
     },
     async changeTaskPosition (
-      { state, commit, dispatch },
+      { state, commit },
       { fromTaskIndex, toTaskIndex, fromTaskId, toTaskColumnId }
     ) {
       try {
@@ -173,7 +173,7 @@ export default new Vuex.Store({
 
         /* NEW POSITION The new position of the task that is moved, is the
         median of the position of the two surrounding tasks. */
-        const newPosition = setNewPosition(state, toTasksList, toTaskIndex, fromTaskIndex)
+        const newPosition = setNewPosition(toTasksList, toTaskIndex, fromTaskIndex)
 
         const doc = await board.get(fromTaskId)
         doc.columnId = toTaskColumnId
@@ -185,14 +185,14 @@ export default new Vuex.Store({
           newPosition
         })
       } catch (error) {
-        console.log(error)
+        console.error(error)
       }
     }
   },
   mutations: {
     SET_BOARD (state, data) {
       // TODO: Refactor to make code simpler to use explicit if-else
-      const setData = (docType, item, state) => {
+      const setData = (docType, item) => {
         // TODO: make the itemstate a const and convert to separate function
         //  Get the column or task list from state
         const getItemState = (docType) => {
@@ -234,7 +234,7 @@ export default new Vuex.Store({
       }
 
       data.map(item => {
-        setData(item.doc.type, item, state)
+        setData(item.doc.type, item)
       })
     },
     CREATE_COLUMN (state, { result, name, newPosition }) {
